@@ -73,9 +73,9 @@ class MusixmatchScraper(Scraper):
 
         return Lyrics(url, lyrics)
 
+# untested! I was not sober while writing this, so be careull... still this sounds like a good idea.
 def filter_track(track):
-    """untested! I was not sober while writing this, so be careull... still this sounds like a good idea.
-    this functino returns the track name as a string. removes words which might impede finding the lyrics."""
+    """this function returns the track name as a string. removes words which might impede finding the lyrics."""
     filtered_track = track
     for f in FILTERS:
         index = track.find(f)
