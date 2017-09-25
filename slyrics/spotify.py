@@ -8,10 +8,10 @@ class SpotifyStatus:
         return "{0} - {1}".format(self.get_track_name(), self.get_track_artist())
 
     def get_track_name(self):
-        return self._status["track"]["artist_resource"]["name"]
+        return self._status["track"]["track_resource"]["name"]
 
     def get_track_artist(self):
-        return self._status["track"]["track_resource"]["name"]
+        return self._status["track"]["artist_resource"]["name"]
 
     def get_version(self):
         return self._status["client_version"]
