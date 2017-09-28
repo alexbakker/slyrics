@@ -80,7 +80,7 @@ def filter_track(track):
         index = track.lower().find(f.lower())  # ignore case
         if index != -1:
             filtered_track = track[: index] + track[index + len(f):]
-    return filtered_track if not filtered_track.endswith(" ") else filtered_track[-1]  # remove trailing white space
+    return filtered_track  # remove trailing white space
 
 FILTERS = [" - (explicit)", " (explicit)"]  # todo: use/build filter strings  'smarter'
 
