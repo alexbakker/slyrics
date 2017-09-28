@@ -82,7 +82,8 @@ def filter_track(track):
             filtered_track = track[: index] + track[index + len(f):]
     return filtered_track  # remove trailing white space
 
-FILTERS = [" - (explicit)", " (explicit)"]  # todo: use/build filter strings  'smarter'
+FILTERS = ["(explicit)"]  # todo: use/build filter strings  'smarter'
+FILTERS = [" - " + x for x in FILTERS]
 
 scrapers = [
     MusixmatchScraper(),
