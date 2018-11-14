@@ -47,7 +47,7 @@ class SpotifyBusStatus:
         return self._status.get('xesam:artist')[0]
 
     def get_version(self):
-        return "Unavailable"
+        return None
 
     def __eq__(self, other):
         return (other and

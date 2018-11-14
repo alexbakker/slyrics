@@ -43,8 +43,10 @@ class SlyricsUI:
             self._window.add(self._box_loading)
 
     def update_status(self, status):
+        version = status.get_version()
+        title = "Slyrics (connected to Spotify{0})".format("" if version is None else " " + version)
         self._label_song.set_text(status.get_track_string())
-        self._window.set_title("Slyrics (connected to Spotify {0})".format(status.get_version()))
+        self._window.set_title(title)
         self._label_lyrics.set_text("")
         self._link_lyrics.hide()
         self._combo_sources.hide()
