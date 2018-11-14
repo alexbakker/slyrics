@@ -140,11 +140,14 @@ class SpotifyWebClient(spotifyClient):
 
 
 class SpotifyBusClient(spotifyClient):
+    def __init__(self):
+        self._interface = None
+
     def find(self):
         bus = dbus.SessionBus()
-        self._bus = bus.get_object('org.mpris.MediaPlayer2.spotify', '/org/mpris/MediaPlayer2')
-        self.player = dbus.Interface(self._bus, 'org.freedesktop.DBus.Properties')
+        obj = bus.get_object('org.mpris.MediaPlayer2.spotify', '/org/mpris/MediaPlayer2')
+        self._interface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
 
     def get_status(self):
-        res = self.player.Get('org.mpris.MediaPlayer2.Player', 'Metadata')
-        return SpotifyBusStatus(res)
+        player = self._interface.Get('org.mpris.MediaPlayer2.Player', 'Metadata')
+        return SpotifyBusStatus(player)
