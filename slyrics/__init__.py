@@ -13,23 +13,24 @@ import slyrics.scrapers as scrapers
 def loop(ui):
     client = None
     def find():
-        client = SpotifyWebClient()
+        client = SpotifyBusClient()
         try:
             client.find()
         except Exception as e:
-            pass  # try a different client
+            # try a different client
+            pass 
         else:
-            print("found spotify on port {0}".format(client.get_port()))
+            print("found spotify on dbus")
             return client
 
-        client = SpotifyBusClient()
+        client = SpotifyWebClient()
         try:
             client.find()
         except Exception as e:
             return None
         else:
-            print("found spotify on dbus")
-        return client
+            print("found spotify on port {0}".format(client.get_port()))
+            return client
 
     status = None
     def update():
@@ -65,13 +66,8 @@ def loop(ui):
 
 def main():
     parser = argparse.ArgumentParser(description="An external lyrics addon for Spotify")
-    #parser.add_argument("--host", dest="host", help="the host to scan")
-    #parser.add_argument("--port", dest="port", type=int, default=-1,
-    #                    help="instead of scanning, use this port")
     parser.add_argument("--version", dest="version", action="store_true", default=False,
                         help="print version")
-    #parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False,
-    #                    help="be verbose")
     args = parser.parse_args(sys.argv[1:])
 
     if args.version:
