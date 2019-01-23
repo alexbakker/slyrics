@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
+import regex
+
 
 class Lyrics:
     def __init__(self, url, text):
@@ -12,6 +14,7 @@ class Lyrics:
     def get_text(self):
         return self._text
 
+
 class Scraper:
     def __init__(self, name):
         self.name = name
@@ -21,6 +24,7 @@ class Scraper:
 
     def find(self, track, artist):
         raise NotImplementedError("method not callable from base class")
+
 
 class GeniusScraper(Scraper):
     def __init__(self):
@@ -42,6 +46,7 @@ class GeniusScraper(Scraper):
             raise Exception("error parsing lyrics")
 
         return Lyrics(url, lyrics.p.text)
+
 
 class MusixmatchScraper(Scraper):
     def __init__(self):
@@ -73,28 +78,60 @@ class MusixmatchScraper(Scraper):
 
         return Lyrics(url, lyrics)
 
-def filter_track(track):
-    """This function returns the track name as a string. Removes words, and  which might impede finding the lyricsm."""
-    filtered_track = track
-    for f in FILTERS:
-        index = track.lower().find(f.lower())  # ignore case
-        if index != -1:
-            filtered_track = track[: index] + track[index + len(f):]
-    return filtered_track  # remove trailing white space
 
-FILTERS = ["(explicit)"]  # todo: use/build filter strings  'smarter'
-FILTERS = [" - " + x for x in FILTERS]
+# words which might make finding a track's lyrics harder
+FILTER_WORDS = ['explicit', 'bonus track', 'extra', 'album', 'version', 'remaster', 'soundtrack', 'radio', 'mix',
+                'remix', 'original', 'edition', 'edit']
+
+
+def filter_track(track, remove_encapsulated_texts=False, remove_filter_words=False, clean=False):
+    """This function returns the track name as a string. Removes words, and  which might impede finding the lyrics.
+    :type remove_encapsulated_texts: bool
+        When remove_encapsulated_texts is True an aggressive regex is used which removes encapsulated substrings
+    """
+    track = track.lower()  # use lowered letters
+
+    if remove_encapsulated_texts:
+        # this regex replaces text encapsulated by: () [] '' {} <>
+        # the exce
+        # text is defined as: [\w0-9 !@#$%^&*\-_=+,.;:~]+
+        for opening, closing in [['\\(', '\\)'], ['\\[', '\\]'], ["'", "'"], ['"', '"'], ['{', '}'], ['<', '>']]:
+            track = regex.sub('(' + opening + r"[\w0-9 !@#$%^&*\-_=\+,.;:~]+" + closing + ')+', " ", track)
+
+    # remove filter words which are surrounded by whitespace
+    if remove_filter_words:
+        track = regex.sub(r"((?:\s|^)" + "|".join(FILTER_WORDS) + r"(?:\s|$))", " ", track)
+
+    # remove all characters which aren't 'a..z' or spaces
+    if clean:
+        track = regex.sub("[\W ]+", " ", track)
+
+    return track.strip()
+
 
 scrapers = [
     MusixmatchScraper(),
     GeniusScraper()
 ]
 
+# the order in which different filter parameters are most likely to result in the wanted track string
+FILTERS = [{'remove_encapsulated_texts': False, 'remove_filter_words': False, 'clean': False},
+           {'remove_encapsulated_texts': False, 'remove_filter_words': False, 'clean': True},
+           {'remove_encapsulated_texts': False, 'remove_filter_words': True, 'clean': True},
+           {'remove_encapsulated_texts': True, 'remove_filter_words': True, 'clean': True}
+           ]
+
+
 def find(track, artist):
-    for scraper in scrapers:
-        try:
-            filtered_track = filter_track(track)
-            return scraper.find(filtered_track, artist)
-        except Exception as e:
-            continue
+    for filter_kwargs in FILTERS:
+        for scraper in scrapers:
+            try:
+                filtered_track = filter_track(track, **filter_kwargs)
+            except Exception as e:
+                filtered_track = track
+
+            try:
+                return scraper.find(filtered_track, artist)
+            except Exception as e:
+                continue
     return None

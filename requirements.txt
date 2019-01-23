@@ -1,0 +1,5 @@
+beautifulsoup4
+dbus-python
+regex
+requests
+PyGObject
